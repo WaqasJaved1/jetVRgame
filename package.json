@@ -1,0 +1,23 @@
+{
+  "name": "catchy",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js",
+    "up": "node app.js &"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.13.4",
+    "express-session": "^1.15.3",
+    "fs": "0.0.1-security",
+    "mysql": "^2.13.0"
+  },
+  "repository": {},
+  "engines": {
+    "node": "4.2.x"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
