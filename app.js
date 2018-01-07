@@ -5,7 +5,7 @@ var session = require('express-session');
 var bodyParser = require('body-parser');
 
 
-
+var highest = [];
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({ limit: '50mb' }));
 
@@ -37,3 +37,73 @@ app.listen(80, '0.0.0.0', function() {
     // print a message when the server starts listening
     console.log("server starting on port" + 80);
 });
+
+app.post("/newHighest", function(req, res) {
+    highest.push(req.body);
+    res.send("Done")
+});
+
+
+app.get("/leaderboard", function (req, res) {
+	var high = JSON.parse(JSON.stringify(highest))
+	high.sort(function(a, b) {
+        var comparison = 0;
+        if (a.score < b.score) {
+            comparison = 1;
+        } else if (b.score < a.score) {
+            comparison = -1;
+        }
+
+        return b.score-a.score;
+    });
+
+    while(high.length > 10){
+    	high.pop();
+    }
+
+    console.log(high);
+
+	res.send(high);
+})
+
+
+app.get('/isHighest:score', function (req,res) {
+	var high = JSON.parse(JSON.stringify(highest))
+	high.sort(function(a, b) {
+        var comparison = 0;
+        if (a.score < b.score) {
+            comparison = 1;
+        } else if (b.score < a.score) {
+            comparison = -1;
+        }
+
+        return comparison;
+    });
+
+    if(req.params.score > high[9].score){
+    	high = true;
+    }else{high = false;}
+
+	res.send(high);	
+})
+
+
+
+highest.push({ 'name':'Waqas', 'score': 10 })
+highest.push({ 'name':'Waqas','score': 20 })
+highest.push({ 'name':'Waqas','score': 50 })
+highest.push({ 'name':'Waqas','score': 5 })
+highest.push({ 'name':'Waqas','score': 3 })
+highest.push({ 'name':'Waqas','score': 2 })
+highest.push({ 'name':'Waqas','score': 10 })
+highest.push({ 'name':'Waqas','score': 20 })
+highest.push({ 'name':'Waqas','score': 50 })
+highest.push({ 'name':'Waqas','score': 5 })
+highest.push({ 'name':'Waqas','score': 3 })
+highest.push({ 'name':'Waqas','score': 2 })
+highest.push({ 'name':'Waqas','score': 10 })
+highest.push({ 'name':'Waqas','score': 20 })
+highest.push({ 'name':'Waqas','score': 50 })
+highest.push({ 'name':'Waqas','score': 5 })
+highest.push({ 'name':'Waqas','score': 3 })
+highest.push({ 'name':'Waqas','score': 2 })

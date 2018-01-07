@@ -9,9 +9,12 @@ var surface2;
 var surface3;
 var stars = [];
 var moveState = {};
+var running = false;
+var score = 0;
+var dead = false;
 
 var surfaces = [];
-var cube;
+var obstacles = [];
 
 THREE.Cache.enabled = true;
 var WINDOW_WIDTH = window.innerWidth;
@@ -61,9 +64,6 @@ function initialize() {
     camera.position.y = 20;
 
 
-
-
-
     // Start New
 
 
@@ -82,10 +82,15 @@ function initialize() {
         objLoader.load('model.obj', function(object) {
             console.log("Loaded");
             jet = object;
+            jet.castShadow = true;
             object.position.set(0, 80, -100);
             // object.rotation.y = 20;
 
             scene.add(object);
+
+
+
+            render();
 
         }, function(xhr) {
 
@@ -106,7 +111,7 @@ function initialize() {
     //Renderer properties
     renderer = new THREE.WebGLRenderer({
         antialias: true,
-        logarithmicDepthBuffer: true,
+        logarithmicDepthBuffer: false,
         alpha: true
     });
 
@@ -135,7 +140,7 @@ function initialize() {
     // Utility to load the DEM data
     var terrainLoader = new THREE.TerrainLoader();
     var geometry = new THREE.PlaneGeometry(WORLD_WIDTH, WORLD_HEIGHT, 299, 284);
-    var geometry2 = new THREE.PlaneGeometry(WORLD_WIDTH-1800, WORLD_HEIGHT, 299, 284);
+    var geometry2 = new THREE.PlaneGeometry(WORLD_WIDTH - 1800, WORLD_HEIGHT, 299, 284);
 
     terrainLoader.load(terrainURL, function(data) {
 
@@ -185,7 +190,7 @@ function initialize() {
                 surfaces.push(surface2);
                 surfaces.push(surface3);
 
-                for (var i = 0; i < 3; i++) {
+                for (var i = 0; i < 4; i++) {
                     var surface5 = surface.clone();
                     surface5.position.z -= (1200 * (i + 1));
                     surface5.depthWrite = false;
@@ -222,6 +227,7 @@ function initialize() {
 
 
     addSphere(scene);
+    generate_Obstacles();
 }
 
 function onWindowResize() {
@@ -231,79 +237,107 @@ function onWindowResize() {
 }
 
 function render() {
+    if (!dead) {
+        myAnimation();
 
-    if (surface2) {
-
-        // surface2.position.x -= 0.5;
-        // console.log(surface2.position)
+    } else {
+        deadAnimation();
     }
-    animateStars();
-    myFunction();
 
-
-    requestAnimationFrame(render);
     manager.render(scene, camera);
+    requestAnimationFrame(render);
 }
 
-var move_speed= 200;
+var move_speed = 200;
 var max_move = 950;
 var max_speed = 1000;
+
 function moveUpdate() {
-   
+
+    var firstBB = new THREE.Box3().setFromObject(jet);
+
     var delta = clock.getDelta();
+
+    var obj = document.getElementById('score');
+    obj.innerText = score = parseInt(parseInt(obj.innerText) + delta * 30);
+    // console.log(1/delta);
 
     for (var i in surfaces) {
         surfaces[i].position.z += delta * 1000;
 
-        if(surfaces[i].position.z >= 400){
+        if (surfaces[i].position.z >= 1000) {
             surfaces[i].position.z = -4900;
         }
     }
 
+    for (var i in obstacles) {
+        obstacles[i].position.z += delta * 1000;
 
-    if(!moveState.left && camera.position.x < -max_move){
+        if (obstacles[i].position.z >= 500) {
+            obstacles[i].position.set(Math.random() * 1800 - 900, 100, Math.random() * -6000 - 5000);
+        }
+
+        var secondBB = new THREE.Box3().setFromObject(obstacles[i]);
+        var collision = firstBB.intersectsBox(secondBB);
+        if (collision) {
+            dead = true;
+        }
+        // console.log("Collision  " + collision);
+    }
+
+    if(dead){
+        end_game();
+    }
+
+
+    if (camera.position.x > -max_move) {
+        camera.position.x = jet.position.x;
+    } else if (camera.position.x < max_move) {
+        camera.position.x = jet.position.x;
+    }
+
+
+    if (!moveState.left && camera.position.x < -max_move) {
         camera.position.x += 10;
-        return;
-    } 
+    }
 
-    if(!moveState.right && camera.position.x > max_move){
+    if (!moveState.right && camera.position.x > max_move) {
         camera.position.x -= 10;
-        return;
-    }    
+    }
 
-    if(moveState.left){
-        if(move_speed < max_speed){
-            move_speed += delta *500;
+    if (moveState.left) {
+        if (move_speed < max_speed) {
+            move_speed += delta * 500;
         }
-        if(jet.position.x > -max_move){
-            jet.position.x -= delta*move_speed;
+        if (jet.position.x > -max_move) {
+            jet.position.x -= delta * move_speed;
         }
-        if(camera.position.x > -max_move-150){
-            camera.position.x -= delta*move_speed;
-        }
-
-    }else if(moveState.right){
-        if(move_speed < max_speed){
-            move_speed += delta *500;
-        }
-        if(jet.position.x < max_move){
-            jet.position.x += delta*move_speed;
+        if (camera.position.x > -max_move - 150) {
+            camera.position.x -= delta * move_speed;
         }
 
-        if(camera.position.x < max_move+150){
-            camera.position.x += delta*move_speed;
+    } else if (moveState.right) {
+        if (move_speed < max_speed) {
+            move_speed += delta * 500;
+        }
+        if (jet.position.x < max_move) {
+            jet.position.x += delta * move_speed;
+        }
+
+        if (camera.position.x < max_move + 150) {
+            camera.position.x += delta * move_speed;
         }
 
     }
 }
-function myFunction() {
+
+function myAnimation() {
     // return;
 
     if (jet) {
         if (jet.rotation.y < 2.65) {
             jet.rotation.y += 0.05;
-        } 
-
+        }
 
 
         if (jet.rotation.y >= 2.65 && camera.position.y < 200) {
@@ -313,11 +347,28 @@ function myFunction() {
         }
 
         if (jet.rotation.y >= 2.65 && camera.position.y >= 200) {
+            running = true;
             moveUpdate();
+            animateStars();
         }
     }
 
     // console.log(jet);
+}
+
+function deadAnimation() {
+
+    if (camera.position.y < 1000) {
+        camera.position.y += 5;
+
+    }
+
+    if (camera.position.z > jet.position.z) {
+        camera.position.z -= 2.5
+    }
+
+    camera.lookAt(new THREE.Vector3(jet.position.x, jet.position.y, jet.position.z));
+
 }
 
 function addSphere(scene) {
@@ -335,10 +386,10 @@ function addSphere(scene) {
         sphere.position.y = Math.random() * 10000 - 5000;
 
         // Then set the z position to where it is in the loop (distance of camera)
-        sphere.position.z = Math.random() *-1000 - 3000;
+        sphere.position.z = Math.random() * -1000 - 3000;
 
         // scale it up a bit
-        sphere.scale.x = sphere.scale.y = Math.random()*20;
+        sphere.scale.x = sphere.scale.y = Math.random() * 20;
 
         //add the sphere to the scene
         scene.add(sphere);
@@ -358,8 +409,8 @@ function animateStars() {
         // and move it forward dependent on the mouseY position. 
         // star.position.z += i / 10;
 
-        star.position.x += star.position.x/100;
-        star.position.y += star.position.y/100;
+        star.position.x += star.position.x / 100;
+        star.position.y += star.position.y / 100;
 
         // if the particle is too close move it to the back
         if (star.position.x > 5000 || star.position.x < -5000 || star.position.y < -5000 || star.position.y > 5000) {
@@ -372,9 +423,11 @@ function animateStars() {
 
 }
 
-
 document.onkeydown = function(event) {
 
+    if (!running) {
+        return;
+    }
     if (event.altKey) {
 
         return;
@@ -396,13 +449,13 @@ document.onkeydown = function(event) {
         case 37:
             /*left*/
             moveState.left = 1;
-            jet.rotation.z = -Math.PI/16;
-            jet.rotation.x = Math.PI/16;
+            jet.rotation.z = -Math.PI / 16;
+            jet.rotation.x = Math.PI / 16;
             break;
         case 39:
             /*right*/
             moveState.right = 1;
-            jet.rotation.z = Math.PI/16;
+            jet.rotation.z = Math.PI / 16;
 
             break;
 
@@ -453,6 +506,107 @@ document.onkeyup = function(event) {
 };
 
 
-initialize();
+function generate_Obstacles() {
 
-render();
+    var textureLoader = new THREE.TextureLoader();
+    // This goes inside the TerrainLoader callback function
+    textureLoader.load("data/obstacles.jpg", function(texture) {
+        // Lambert is a type non-reflective material
+        var material = new THREE.MeshLambertMaterial({
+            map: texture
+        });
+
+        var cubeMaterialArray = [];
+
+        cubeMaterialArray.push(material);
+        cubeMaterialArray.push(material);
+        cubeMaterialArray.push(material);
+        cubeMaterialArray.push(material);
+        cubeMaterialArray.push(material);
+        cubeMaterialArray.push(material);
+
+        var cubeMaterials = new THREE.MeshFaceMaterial(cubeMaterialArray);
+        var cubeGeometry = new THREE.CubeGeometry(200, 300, 200);
+        var cube = new THREE.Mesh(cubeGeometry, cubeMaterials);
+
+        for (var i = 0; i < 16; i++) {
+            var temp = cube.clone();
+            temp.position.set(Math.random() * 1800 - 900, 100, Math.random() * -6000 - 5000);
+            obstacles.push(temp);
+            scene.add(temp);
+        }
+
+    });
+    // var cubeMaterialArray = [];
+    // order to add materials: x+,x-,y+,y-,z+,z-
+    // cubeMaterialArray.push( new THREE.MeshBasicMaterial( { color: 0xff3333 } ) );
+    // cubeMaterialArray.push( new THREE.MeshBasicMaterial( { color: 0xff8800 } ) );
+    // cubeMaterialArray.push( new THREE.MeshBasicMaterial( { color: 0xffff33 } ) );
+    // cubeMaterialArray.push( new THREE.MeshBasicMaterial( { color: 0x33ff33 } ) );
+    // cubeMaterialArray.push( new THREE.MeshBasicMaterial( { color: 0x3333ff } ) );
+    // cubeMaterialArray.push( new THREE.MeshBasicMaterial( { color: 0x8833ff } ) );
+    // var cubeMaterials = new THREE.MeshFaceMaterial( cubeMaterialArray );
+
+    // var cubeGeometry = new THREE.CubeGeometry( 200, 300, 200);
+
+    // var cube = new THREE.Mesh( cubeGeometry, cubeMaterials );
+
+    // for (var i = 0; i < 16; i++) {
+    // var temp = cube.clone();
+    // temp.position.set(Math.random()* 1800 -900, 150, Math.random()*-4000 - 5000);
+    // obstacles.push(temp);
+    // scene.add(temp);
+    // }
+
+    // cube.position.set(0, 150, -300);
+
+}
+
+function end_game() {
+    document.getElementById("highscore").style.display = "block";;
+
+    $.ajax({
+            type: "GET",
+            url: '/isHighest'+ score,
+            success: function (suc) {
+                console.log(suc)
+
+                if(suc){
+                    document.getElementById("newHighest").style.display = "block";;
+                }
+            },
+            error:function (err) {
+                console.log(err);
+                submit = false;
+            }
+        });
+}
+
+var submit = false;
+function submitHighScore() {
+    var name = document.getElementById("name");
+    console.log(name.value);
+    if (name.value && name.value != "" && !submit) {
+        submit = true;
+
+        $.ajax({
+            type: "POST",
+            url: '/newHighest',
+            data: {'name':name.value, score:score},
+            success: function (suc) {
+                console.log(suc)
+
+                if(suc =="Done"){
+                    window.location = "leaderboard.html";
+                }
+            },
+            error:function (err) {
+                console.log(err);
+                submit = false;
+            }
+        });
+    }
+}
+
+
+initialize();

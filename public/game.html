@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>CG Project with Three.js</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>My first Three.js app</title>
+    <style>
+    body {
+        margin: 0;
+    }
+
+    canvas {
+        width: 100%!important;
+        height: 100%!important
+    }
+
+    .c1{
+        padding: 10px;
+    }
+
+    #crash{
+        font-size: 30px;
+        padding: 20px;
+    }
+    #highscore{
+        height: 80%;
+        color: black !important;
+        background-color: rgba(255,255,255, 0.5);
+        position: absolute;
+        top: 10px;
+        width: 80%;
+        margin-left: 10%;
+        text-align: center;
+        z-index: 100;
+        display: block;
+        margin-top: 5%;
+    }
+
+    #info {
+        position: absolute;
+        top: 10px;
+        width: 100%;
+        text-align: center;
+        z-index: 100;
+        display: block;
+        color: white!important
+    }
+    </style>
+
+
+    <!-- Load screen -->
+<link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+    <style type="text/css">
+    .back-link a {
+        color: #4ca340;
+        text-decoration: none; 
+        border-bottom: 1px #4ca340 solid;
+    }
+    .back-link a:hover,
+    .back-link a:focus {
+        color: #408536; 
+        text-decoration: none;
+        border-bottom: 1px #408536 solid;
+    }
+    h1 {
+        height: 100%;
+        margin: 0;
+        font-size: 14px;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 32px;
+        margin-bottom: 3px;
+    }
+    .entry-header {
+        text-align: left;
+        margin: 0 auto 50px auto;
+        width: 80%;
+        max-width: 978px;
+        position: relative;
+        z-index: 10001;
+    }
+    #demo-content {
+        /*padding-top: 100px;*/
+    }
+    </style>
+    <!-- load scree -->
+</head>
+
+<body>
+    <!-- load screen -->
+    <script src="js/jquery.js"></script>
+    <script>
+    window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')
+    </script>
+    <script src="js/main.js"></script>
+    <div class="demo">
+        <div id="demo-content">
+            <div id="loader-wrapper">
+                <div id="loader"></div>
+                <div class="loader-section section-left"></div>
+                <div class="loader-section section-right"></div>
+            </div>
+        </div>
+    </div>
+    <!-- end load screen -->
+    <script>
+    WebVRConfig = {
+        // Forces availability of VR mode.
+        FORCE_ENABLE_VR: true,
+    };
+    </script>
+    <script src="textures/floor.js">
+    </script>
+    <script src="objects/model.js">
+    </script>
+    <script src="js/three.js"></script>
+    <!--  -->
+    <script src="js/es6-promise.min.js"></script>
+    <script src="js/three.flycontrols.js"></script>
+    <script src="js/three.terrainloader.js"></script>
+    <script src="js/VRControls.js"></script>
+    <script src="js/VREffect.js"></script>
+    <script src="js/webvr-polyfill.js"></script>
+    <script src="js/webvr-manager.js"></script>
+    <!--  -->
+    <script src="js/OBJLoader.js"></script>
+    <script src="js/MTLLoader.js"></script>
+    <script src="js/mythree.js">
+    </script>
+    <div id="info">Score: <span id="score">0</span></div>
+
+
+    <div id="highscore" style="display: none;">
+        <div id = "crash">
+            You Crashed
+        </div>
+        <div id ="newHighest" style="display: none;">
+            <div class="c1">
+                Enter Your Name to display on LeaderBoard
+            </div>
+            <div class="c1">
+                <input name ="name" placeholder="Name" id = "name"></input>
+            </div>
+            <div class="c1">
+                <button onclick="submitHighScore()">Submit</button>
+            </div>
+        </div>
+        <div class="c1">
+            <button onclick="location.reload();">Play Again</button>
+        </div>
+    </div>
+</body>
+
+</html>

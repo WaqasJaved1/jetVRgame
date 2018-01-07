@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title></title>
+    <style type="text/css">
+    *,
+    *:before,
+    *:after {
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+    }
+
+    body,
+    html {
+        min-height: 100%;
+    }
+
+    body {
+        background: #444;
+    }
+
+    .leaderboard {
+        position: relative;
+        width: 70%;
+        height: 70%;
+        max-width: 960px;
+        min-width: 400px;
+        min-height: 600px;
+        margin: 30px auto 0 auto;
+        padding: 3%;
+    }
+
+    .leaderboard h1 {
+        text-align: center;
+        text-transform: uppercase;
+        margin: 30px;
+        padding: 0;
+        color: #1377cc;
+    }
+
+    .content {
+        position: relative;
+        width: 70%;
+        margin: 3px auto 0 auto;
+        min-width: 300px;
+    }
+
+    .content ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        border: 5px solid #CCC;
+        background: rgba(40, 40, 40, 0.75);
+    }
+
+    .content ul li {
+        position: relative;
+        color: #FFF;
+        font-family: helvetica;
+        padding: 2% 5%;
+        border-bottom: 1px solid #555;
+    }
+
+    .content ul li:last-child {
+        border-bottom: none;
+    }
+
+    .name {
+        font-weight: bold;
+    }
+
+    .count {
+        display: inline-block;
+        float: right;
+        color: #F00;
+        font-weight: bold;
+    }
+
+
+    .content ul {
+        border-radius: 20px;
+    }
+
+    video { 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -100;
+    transform: translateX(-50%) translateY(-50%);
+    background: src('images/vid.mp4') no-repeat;
+    background-size: cover;
+    transition: 1s opacity;
+}
+
+#myVideo {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    min-width: 100%; 
+    min-height: 100%;
+}
+    </style>
+</head>
+
+<body>
+    <video autoplay muted loop id="myVideo"> <source src="images/vid.mp4" type="video/mp4">
+  Your browser does not support HTML5 video.
+</video>
+    <div class='leaderboard'>
+        <h1><span>Leader Board</span></h1>
+        <div class="content">
+            <ul id="leaderboard">
+            </ul>
+        </div>
+        <script type="text/javascript" src="js/jquery.js"></script>
+        <script type="text/javascript">
+        $.ajax({
+            type: "GET",
+            url: '/leaderboard',
+            success: function(suc) {
+                if (suc) {
+                    var str = ""
+                    for (var i in suc) {
+                        str += '<li class=""><span class="name">';
+                        str += suc[i].name;
+                        str += '</span><span class="count">';
+                        str += suc[i].score;
+                        str += '</span></li>'
+                    }
+
+                    document.getElementById('leaderboard').innerHTML = str;
+                }
+
+            },
+            error: function(err) {
+                console.log(err);
+                submit = false;
+            }
+        });
+        </script>
+    </div>
+</body>
+
+</html>
