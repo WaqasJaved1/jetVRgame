@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>CG Project with Three.js</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>My first Three.js app</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+</head>
+
+<body id="body1">
+    <div id="angle">NONE</div>
+    <div id="orientation">NONE</div>
+    <script type="text/javascript">
+    window.addEventListener("deviceorientation", handleOrientation, true);
+
+    function handleOrientation(event) {
+        // those angles are in degrees
+        var alpha = event.alpha;
+        var beta = event.beta;
+        var gamma = event.gamma;
+
+        // JS math works in radians
+        var betaR = beta / 180 * Math.PI;
+        var gammaR = gamma / 180 * Math.PI;
+        var spinR = Math.atan2(Math.cos(betaR) * Math.sin(gammaR), Math.sin(betaR));
+
+        // convert back to degrees
+        var spin = spinR * 180 / Math.PI;
+        spin *= -1;
+        if(spin < 75){
+            document.getElementById("orientation").innerHTML = "Right";
+        }else if(spin > 105){
+            document.getElementById("orientation").innerHTML = "Left";
+        }else{
+            document.getElementById("orientation").innerHTML = "None";
+
+        }
+        document.getElementById("angle").innerHTML = spin;
+    }
+
+    </script>
+</body>
+
+</html>

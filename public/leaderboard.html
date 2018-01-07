@@ -3,86 +3,8 @@
 
 <head>
     <title></title>
-    <style type="text/css">
-    *,
-    *:before,
-    *:after {
-        box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        -webkit-box-sizing: border-box;
-    }
-
-    body,
-    html {
-        min-height: 100%;
-    }
-
-    body {
-        background: #444;
-    }
-
-    .leaderboard {
-        position: relative;
-        width: 70%;
-        height: 70%;
-        max-width: 960px;
-        min-width: 400px;
-        min-height: 600px;
-        margin: 30px auto 0 auto;
-        padding: 3%;
-    }
-
-    .leaderboard h1 {
-        text-align: center;
-        text-transform: uppercase;
-        margin: 30px;
-        padding: 0;
-        color: #1377cc;
-    }
-
-    .content {
-        position: relative;
-        width: 70%;
-        margin: 3px auto 0 auto;
-        min-width: 300px;
-    }
-
-    .content ul {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-        border: 5px solid #CCC;
-        background: rgba(40, 40, 40, 0.75);
-    }
-
-    .content ul li {
-        position: relative;
-        color: #FFF;
-        font-family: helvetica;
-        padding: 2% 5%;
-        border-bottom: 1px solid #555;
-    }
-
-    .content ul li:last-child {
-        border-bottom: none;
-    }
-
-    .name {
-        font-weight: bold;
-    }
-
-    .count {
-        display: inline-block;
-        float: right;
-        color: #F00;
-        font-weight: bold;
-    }
-
-
-    .content ul {
-        border-radius: 20px;
-    }
-
+    <style>
+    
     video { 
     position: fixed;
     top: 50%;
@@ -98,6 +20,7 @@
     transition: 1s opacity;
 }
 
+
 #myVideo {
     position: fixed;
     right: 0;
@@ -105,19 +28,133 @@
     min-width: 100%; 
     min-height: 100%;
 }
-    </style>
+
+.title{
+margin-top: 50px
+}
+
+@import url(https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300|Oxygen);
+
+/* Page layout */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Oxygen', sans-serif;
+    color: #FFF;
+    font-size: 20px;
+    line-height: 18px;
+    font-weight: 300;
+}
+
+table.hs {
+    margin: 50px 40px 0 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+    background: #212121;
+    color: #fff;
+    opacity: 0.8;
+}
+
+table.hs th, table.hs td {
+    text-align: center;
+}
+
+table.hs thead {
+    line-height: 12px;
+    background: #5e90ff;
+    text-transform: uppercase;
+}
+
+table.hs thead th {
+    color: #fff;
+    padding: 10px;
+    letter-spacing: 1px;
+    vertical-align: bottom;
+}
+
+table.hs thead th:nth-child(1) {
+    width: 20%;
+    text-align: left;
+    padding-left: 20px;
+}
+
+table.hs thead th:nth-child(2) {
+    width: 30%;
+}
+
+table.hs thead th:nth-child(3) {
+    width: 35%;
+}
+
+table.hs thead th:nth-child(4) {
+    width: 15%;
+}
+
+table.hs tbody {
+    font-size: 1em;
+    line-height: 15px;
+}
+
+table.hs tbody tr {
+    border-top: 2px solid rgba(109, 176, 231, 0.8);
+    transition: background 0.6s, color 0.6s;
+}
+
+table.hs tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+table.hs tbody tr:hover {
+    color: #2e90ff;
+    background: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+table.hs tbody td {
+    padding: 12px;
+}
+
+table.hs tbody tr:hover td:first-child {
+    background: rgba(0,0,0,0);
+}
+
+table.hs tbody td:first-child {
+    text-align: left;
+    padding-left: 20px;
+    font-weight: 700;
+    background: rgba(109, 176, 231, 0.35);
+    transition: backgrounf 0.6s;
+}
+
+
+
+
+</style>
 </head>
 
-<body>
+<body id="body1">
+    
+
     <video autoplay muted loop id="myVideo"> <source src="images/vid.mp4" type="video/mp4">
   Your browser does not support HTML5 video.
 </video>
-    <div class='leaderboard'>
-        <h1><span>Leader Board</span></h1>
-        <div class="content">
-            <ul id="leaderboard">
-            </ul>
-        </div>
+<center><img class = "title" src="images/hs.png"></center>
+<center><table class="hs">
+        <thead>
+            <tr>
+                <th>Position</th>
+                <th>Name</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        
+        <tbody id = "leaderboard">
+            
+        </tbody>
+    </table></center>
+
+
         <script type="text/javascript" src="js/jquery.js"></script>
         <script type="text/javascript">
         $.ajax({
@@ -127,11 +164,14 @@
                 if (suc) {
                     var str = ""
                     for (var i in suc) {
-                        str += '<li class=""><span class="name">';
+                        str += '<tr><td>';
+                        str += (parseInt(i)+1);
+                        str += '<td>';
+
                         str += suc[i].name;
-                        str += '</span><span class="count">';
+                        str += '</td><td>';
                         str += suc[i].score;
-                        str += '</span></li>'
+                        str += '</td></tr>'
                     }
 
                     document.getElementById('leaderboard').innerHTML = str;

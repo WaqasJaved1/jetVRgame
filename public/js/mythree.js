@@ -88,7 +88,10 @@ function initialize() {
 
             scene.add(object);
 
-
+            setTimeout(function(){
+                $('body').addClass('loaded');
+                $('h1').css('color','#222222');
+            }, 100);
 
             render();
 
@@ -505,6 +508,51 @@ document.onkeyup = function(event) {
 
 };
 
+var is_mobile= /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+// Conditionally load VR or Fly controls, based on whether we're on a mobile device
+if (is_mobile) {
+window.addEventListener("deviceorientation", handleOrientation, true);
+    
+}
+
+
+    function handleOrientation(event) {
+        // those angles are in degrees
+        var alpha = event.alpha;
+        var beta = event.beta;
+        var gamma = event.gamma;
+
+        // JS math works in radians
+        var betaR = beta / 180 * Math.PI;
+        var gammaR = gamma / 180 * Math.PI;
+        var spinR = Math.atan2(Math.cos(betaR) * Math.sin(gammaR), Math.sin(betaR));
+
+        // convert back to degrees
+        var spin = spinR * 180 / Math.PI;
+        spin *= -1;
+        if(spin < 75){
+            // document.getElementById("orientation").innerHTML = "Right";
+            moveState.right = 1;
+            jet.rotation.z = Math.PI / 16;
+        }else if(spin > 105){
+            // document.getElementById("orientation").innerHTML = "Left";
+            moveState.left = 1;
+            jet.rotation.z = -Math.PI / 16;
+            jet.rotation.x = Math.PI / 16;
+        }else{
+            // document.getElementById("orientation").innerHTML = "None";
+            move_speed = 200;
+            moveState.left = 0;
+            moveState.right = 0;
+            jet.rotation.z = 0;
+            jet.rotation.x = 0;
+
+        }
+        document.getElementById("angle").innerHTML = spin;
+    }
+
+
 
 function generate_Obstacles() {
 
@@ -561,6 +609,9 @@ function generate_Obstacles() {
     // cube.position.set(0, 150, -300);
 
 }
+
+
+
 
 function end_game() {
     document.getElementById("highscore").style.display = "block";;

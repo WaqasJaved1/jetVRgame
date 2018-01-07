@@ -140,21 +140,22 @@
 
     <div id="highscore" style="display: none;">
         <div id = "crash">
-            You Crashed
+            <center><img class = "title" src="images/crash.png"></center>
         </div>
         <div id ="newHighest" style="display: none;">
             <div class="c1">
-                Enter Your Name to display on LeaderBoard
+                <center><img class = "title" src="images/nhigh.png"></center>
+                <center><img class = "title" src="images/input.png"></center>
             </div>
             <div class="c1">
-                <input name ="name" placeholder="Name" id = "name"></input>
+                <center><input type="text" id="input1" placeholder = "name here" maxlength='9' ></input>
             </div>
             <div class="c1">
-                <button onclick="submitHighScore()">Submit</button>
+                <center><img class = "pop" src="images/submit.png" onclick="submitHighScore()"></center>
             </div>
         </div>
         <div class="c1">
-            <button onclick="location.reload();">Play Again</button>
+            <img class = "title" src="images/again.png" onclick="location.reload();">
         </div>
     </div>
 </body>
