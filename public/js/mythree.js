@@ -1,13 +1,17 @@
 var renderer;
 var scene;
 var camera;
-var cube;
-var cube2;
 var n;
 var jet;
 var manager;
 var surface;
-var controls;
+var surface2;
+var surface3;
+var stars = [];
+var moveState = {};
+
+var surfaces = [];
+var cube;
 
 THREE.Cache.enabled = true;
 var WINDOW_WIDTH = window.innerWidth;
@@ -27,31 +31,9 @@ function initialize() {
     scene = new THREE.Scene();
 
     //camera
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 4500);
 
-    //rectanle
-    var cubeMaterialArray = [];
-    // order to add materials: x+,x-,y+,y-,z+,z-
-    cubeMaterialArray.push(new THREE.MeshBasicMaterial({ color: 0xff3333 }));
-    cubeMaterialArray.push(new THREE.MeshBasicMaterial({ color: 0xff8800 }));
-    cubeMaterialArray.push(new THREE.MeshBasicMaterial({ color: 0xffff33 }));
-    cubeMaterialArray.push(new THREE.MeshBasicMaterial({ color: 0x33ff33 }));
-    cubeMaterialArray.push(new THREE.MeshBasicMaterial({ color: 0x3333ff }));
-    cubeMaterialArray.push(new THREE.MeshBasicMaterial({ color: 0x8833ff }));
-    var cubeMaterials = new THREE.MeshFaceMaterial(cubeMaterialArray);
 
-    var cubeGeometry = new THREE.CubeGeometry(60, 10, 100);
-
-    cube = new THREE.Mesh(cubeGeometry, cubeMaterials);
-    cube.position.set(0, 5, 0);
-    // scene.add(cube);
-
-    //cubes
-    var cubeGeometry2 = new THREE.CubeGeometry(60, 60, 60);
-    cube2 = new THREE.Mesh(cubeGeometry2, cubeMaterials);
-    cube2.position.set(0, 5, -400);
-    cube2.rotation.y = 10;
-    // scene.add(cube2);
 
     //light
     var directionalLight = new THREE.DirectionalLight(16777215);
@@ -77,6 +59,10 @@ function initialize() {
 
     camera.position.z = 0;
     camera.position.y = 20;
+
+
+
+
 
     // Start New
 
@@ -120,13 +106,15 @@ function initialize() {
     //Renderer properties
     renderer = new THREE.WebGLRenderer({
         antialias: true,
-        logarithmicDepthBuffer: false,
+        logarithmicDepthBuffer: true,
         alpha: true
     });
 
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMapEnabled = true;
     renderer.shadowMapSoft = true;
+
+    // renderer.setClearColorHex( 0xffffff, 1 );
     renderer.setClearColor(new THREE.Color().setRGB(0, 0, 0));
 
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -146,28 +134,20 @@ function initialize() {
 
     // Utility to load the DEM data
     var terrainLoader = new THREE.TerrainLoader();
-
-    // We'll need this later
-
-    // Create the plane geometry
     var geometry = new THREE.PlaneGeometry(WORLD_WIDTH, WORLD_HEIGHT, 299, 284);
+    var geometry2 = new THREE.PlaneGeometry(WORLD_WIDTH-1800, WORLD_HEIGHT, 299, 284);
 
     terrainLoader.load(terrainURL, function(data) {
 
-
-        console.log(data);
-        // var data =[];
         // Adjust each vertex in the plane to correspond to the height value in the DEM file.
         for (var i = 0, l = geometry.vertices.length; i < l; i++) {
-            // data.push(Math.random()*5000);
             geometry.vertices[i].z = data[i] / 65535 * 100;
+            geometry2.vertices[i].z = Math.random() * 1000 / 65535 * 100;
         }
-        console.log(data);
 
         var textureLoader = new THREE.TextureLoader();
-        var textureURL = "data/Gale_texture_high_4096px.jpg";
         // This goes inside the TerrainLoader callback function
-        textureLoader.load(textureURL, function(texture) {
+        textureLoader.load("data/f1.jpg", function(texture) {
             // Lambert is a type non-reflective material
             var material = new THREE.MeshLambertMaterial({
                 map: texture
@@ -177,19 +157,61 @@ function initialize() {
             surface.rotation.x = 4.713;
             surface.position.y -= 100;
             surface.position.z -= 1000;
-            scene.add(surface);
 
-            var surface2 = surface.clone();
-            surface2.position.z -= 1900;
-            surface2.position.y -= 50;
-            scene.add(surface2);
+            textureLoader.load("data/f1.jpg", function(texture) {
+                // Lambert is a type non-reflective material
+                var material = new THREE.MeshLambertMaterial({
+                    map: texture,
+                    transparent: true,
+                    opacity: 0.2
+                });
 
-            var surface3 = surface2.clone();
-            surface3.position.z -= 1900;
-            surface3.position.y -= 50;
-            scene.add(surface3);
+                surface2 = new THREE.Mesh(geometry2, material);
+                surface2.position.y += 50;
+                surface2.rotation.x = 4.713;
+                surface2.position.z -= 1000;
 
+                var surface3 = surface2.clone();
+
+                surface2.rotation.y = Math.PI / 2;
+                surface2.position.x -= 1000;
+
+                surface3.rotation.y = -Math.PI / 2;
+                surface3.position.x += 1000;
+
+                // ------
+
+                surfaces.push(surface);
+                surfaces.push(surface2);
+                surfaces.push(surface3);
+
+                for (var i = 0; i < 3; i++) {
+                    var surface5 = surface.clone();
+                    surface5.position.z -= (1200 * (i + 1));
+                    surface5.depthWrite = false;
+
+                    var surface6 = surface2.clone();
+                    surface6.position.z -= (1200 * (i + 1));
+                    surface6.depthWrite = false;
+
+                    var surface7 = surface3.clone();
+                    surface7.position.z -= (1200 * (i + 1));
+                    surface7.depthWrite = false;
+
+                    surfaces.push(surface5);
+                    surfaces.push(surface6);
+                    surfaces.push(surface7);
+                }
+
+                for (var i in surfaces) {
+                    scene.add(surfaces[i]);
+                }
+
+
+            });
         });
+
+
 
     }, function(xhr) {
         console.log("_______________________" + xhr);
@@ -198,25 +220,8 @@ function initialize() {
     });
 
 
-    var is_mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-    // Conditionally load VR or Fly controls, based on whether we're on a mobile device
-    if (is_mobile) {
-        controls = new THREE.VRControls(camera);
-    } else {
-        // WASD-style movement controls
-        controls = new THREE.FlyControls(camera);
-
-        // Disable automatic forward movement
-        controls.autoForward = true;
-
-        // Click and drag to look around with the mouse
-        controls.dragToLook = true;
-
-        // Movement and roll speeds, adjust these and see what happens!
-        controls.movementSpeed = 100;
-        controls.rollSpeed = Math.PI / 12;
-    }
+    addSphere(scene);
 }
 
 function onWindowResize() {
@@ -226,57 +231,226 @@ function onWindowResize() {
 }
 
 function render() {
-    myFunction();
-    if(clock && controls){
-        var delta = clock.getDelta();
-        controls.update(delta);
 
+    if (surface2) {
+
+        // surface2.position.x -= 0.5;
+        // console.log(surface2.position)
     }
+    animateStars();
+    myFunction();
+
 
     requestAnimationFrame(render);
     manager.render(scene, camera);
 }
 
+var move_speed= 200;
+var max_move = 950;
+var max_speed = 1000;
+function moveUpdate() {
+   
+    var delta = clock.getDelta();
 
-var direction = +1;
+    for (var i in surfaces) {
+        surfaces[i].position.z += delta * 1000;
 
-function myFunction() {
-    if (surface) {
-        // surface.position.y -=0.1;
+        if(surfaces[i].position.z >= 400){
+            surfaces[i].position.z = -4900;
+        }
     }
+
+
+    if(!moveState.left && camera.position.x < -max_move){
+        camera.position.x += 10;
+        return;
+    } 
+
+    if(!moveState.right && camera.position.x > max_move){
+        camera.position.x -= 10;
+        return;
+    }    
+
+    if(moveState.left){
+        if(move_speed < max_speed){
+            move_speed += delta *500;
+        }
+        if(jet.position.x > -max_move){
+            jet.position.x -= delta*move_speed;
+        }
+        if(camera.position.x > -max_move-150){
+            camera.position.x -= delta*move_speed;
+        }
+
+    }else if(moveState.right){
+        if(move_speed < max_speed){
+            move_speed += delta *500;
+        }
+        if(jet.position.x < max_move){
+            jet.position.x += delta*move_speed;
+        }
+
+        if(camera.position.x < max_move+150){
+            camera.position.x += delta*move_speed;
+        }
+
+    }
+}
+function myFunction() {
+    // return;
 
     if (jet) {
         if (jet.rotation.y < 2.65) {
             jet.rotation.y += 0.05;
-        } else {
-            if (jet.position.y < 79) {
-                direction = +1;
-            } else if (jet.position.y > 81) {
-                direction = -1;
-            }
-
-            jet.position.y += direction * 0.1;
-            cube2.position.z += 0.5;
-        }
+        } 
 
 
 
-        if (jet.rotation.y >= 2.65 && camera.position.y < 80) {
+        if (jet.rotation.y >= 2.65 && camera.position.y < 200) {
+            jet.position.y += 0.5;
             camera.position.y += 1;
-            camera.position.z += 1;
+            camera.position.z += 1.5;
         }
 
-        if(jet.rotation.y >= 2.65 && camera.position.y >= 80){
-            jet.position.z = camera.position.z-200; 
-            jet.position.x = camera.position.x; 
-            jet.position.y = camera.position.y; 
-            // jet.rotation.z = -camera.rotation.z; 
-            // jet.rotation.x = camera.rotation.z/2; 
+        if (jet.rotation.y >= 2.65 && camera.position.y >= 200) {
+            moveUpdate();
         }
     }
 
     // console.log(jet);
 }
+
+function addSphere(scene) {
+
+    // The loop will move from z position of -1000 to z position 1000, adding a random particle at each position. 
+    for (var z = -1000; z < 1000; z += 20) {
+
+        // Make a sphere (exactly the same as before). 
+        var geometry = new THREE.SphereGeometry(0.5, 32, 32)
+        var material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        var sphere = new THREE.Mesh(geometry, material)
+
+        // This time we give the sphere random x and y positions between -500 and 500
+        sphere.position.x = Math.random() * 10000 - 5000;
+        sphere.position.y = Math.random() * 10000 - 5000;
+
+        // Then set the z position to where it is in the loop (distance of camera)
+        sphere.position.z = Math.random() *-1000 - 3000;
+
+        // scale it up a bit
+        sphere.scale.x = sphere.scale.y = Math.random()*20;
+
+        //add the sphere to the scene
+        scene.add(sphere);
+
+        //finally push it to the stars array 
+        stars.push(sphere);
+    }
+}
+
+function animateStars() {
+
+    // loop through each star
+    for (var i = 0; i < stars.length; i++) {
+
+        star = stars[i];
+
+        // and move it forward dependent on the mouseY position. 
+        // star.position.z += i / 10;
+
+        star.position.x += star.position.x/100;
+        star.position.y += star.position.y/100;
+
+        // if the particle is too close move it to the back
+        if (star.position.x > 5000 || star.position.x < -5000 || star.position.y < -5000 || star.position.y > 5000) {
+
+            star.position.x = Math.random() * 10000 - 5000;
+            star.position.y = Math.random() * 10000 - 5000;
+        };
+
+    }
+
+}
+
+
+document.onkeydown = function(event) {
+
+    if (event.altKey) {
+
+        return;
+
+    }
+    //event.preventDefault();
+
+    switch (event.keyCode) {
+
+        case 38:
+            /*up*/
+            moveState.up = 1;
+            break;
+        case 40:
+            /*down*/
+            moveState.down = 1;
+            break;
+
+        case 37:
+            /*left*/
+            moveState.left = 1;
+            jet.rotation.z = -Math.PI/16;
+            jet.rotation.x = Math.PI/16;
+            break;
+        case 39:
+            /*right*/
+            moveState.right = 1;
+            jet.rotation.z = Math.PI/16;
+
+            break;
+
+
+    }
+
+};
+
+document.onkeyup = function(event) {
+
+    if (event.altKey) {
+
+        return;
+
+    }
+    //event.preventDefault();
+
+    switch (event.keyCode) {
+
+        case 38:
+            /*up*/
+            moveState.up = 0;
+            break;
+        case 40:
+            /*down*/
+            moveState.down = 0;
+            break;
+
+        case 37:
+            /*left*/
+            move_speed = 200;
+            moveState.left = 0;
+            jet.rotation.z = 0;
+            jet.rotation.x = 0;
+
+            break;
+        case 39:
+            /*right*/
+            move_speed = 200;
+            moveState.right = 0;
+            jet.rotation.z = 0;
+
+            break;
+
+
+    }
+
+};
 
 
 initialize();
